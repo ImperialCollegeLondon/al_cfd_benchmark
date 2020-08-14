@@ -1,0 +1,56 @@
+/*--------------------------------*- C++ -*----------------------------------*\
+  =========                 |
+  \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
+   \\    /   O peration     | Website:  https://openfoam.org
+    \\  /    A nd           | Version:  6
+     \\/     M anipulation  |
+\*---------------------------------------------------------------------------*/
+FoamFile
+{
+    version     2.0;
+    format      ascii;
+    class       volScalarField;
+    location    "0";
+    object      k;
+}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+#include "../parameters"
+
+//Calculations
+dToD            #calc    "sqrt($sigma)";
+lToD            #calc    "$dToD * $sTod";
+U               1.0;
+intensity       0.02;
+k               #calc    "0.5 * $intensity * $intensity * $U * $U";
+epsilon         #calc    "0.09 * $k *$k / 10.0 / (1.0 * $Diameter / $Re *1000)";
+mixingLength    #calc    "0.038 * $Diameter";
+
+dimensions      [0 2 -2 0 0 0 0];
+
+internalField   uniform $k;
+
+boundaryField
+{
+    inlet
+    {
+        type            turbulentIntensityKineticEnergyInlet;
+        intensity       $intensity;
+        value           $internalField;
+    }
+    outlet
+    {
+        type            zeroGradient;
+    }
+    walls
+    {
+        type            kLowReWallFunction;
+        value           $internalField;
+    }
+
+    #includeEtc "caseDicts/setConstraintTypes"
+
+}
+
+
+// ************************************************************************* //

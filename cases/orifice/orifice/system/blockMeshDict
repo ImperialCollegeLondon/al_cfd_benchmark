@@ -1,0 +1,199 @@
+/*--------------------------------*- C++ -*----------------------------------*\
+  =========                 |
+  \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
+   \\    /   O peration     | Website:  https://openfoam.org
+    \\  /    A nd           | Version:  6
+     \\/     M anipulation  |
+\*---------------------------------------------------------------------------*/
+FoamFile
+{
+    version     2.0;
+    format      ascii;
+    class       dictionary;
+    object      blockMeshDict;
+}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+#include "../parameters"
+
+//Calculations
+dToD            #calc    "sqrt($sigma)";
+lToD            #calc    "$dToD * $sTod";
+piperadius      #calc    "$Diameter / 2.0";
+xa              #calc    "$Diameter * $inletToD";
+outletlength    #calc    "$outletToD * $Diameter";
+length          #calc    "$lToD * $Diameter";
+radius          #calc    "$dToD * $piperadius";
+xb              #calc    "$xa + $length";
+pipelength      #calc    "$xb + $outletlength";
+xacells         #calc    "round(sqrt($MeshFactor)*0.1*$xa/$size)";
+xbcells         #calc    "round(sqrt($MeshFactor)*$length/$size)";
+outletcells     #calc    "round(sqrt($MeshFactor)*0.4*$outletlength/$size)";
+radiuscells     #calc    "round(sqrt($MeshFactor)*$radius/$size)";
+piperadiuscells #calc    "round(sqrt($MeshFactor)*($piperadius - $radius)/$size)";
+
+convertToMeters 1;
+
+vertices
+(
+    (0           0           0)
+    ($pipelength 0           0)
+    ($pipelength $piperadius 0)
+    (0           $piperadius 0)
+
+    (0           0           0.001)
+    ($pipelength 0           0.001)
+    ($pipelength $piperadius 0.001)
+    (0           $piperadius 0.001)
+
+    ($pipelength $radius     0)
+    (0           $radius     0)
+    ($pipelength $radius     0.001)
+    (0           $radius     0.001)
+
+    ($xb         $piperadius 0)
+    ($xb         $radius     0)
+    ($xb         $radius     0.001)
+    ($xb         $piperadius 0.001)
+
+    ($xa         $piperadius 0)
+    ($xa         $radius     0)
+    ($xa         $radius     0.001)
+    ($xa         $piperadius 0.001)
+
+    ($xa         0           0)
+    ($xb         0           0)
+    ($xa         0           0.001)
+    ($xb         0           0.001)
+);
+
+blocks
+(
+    hex (0 20 17 9 4 22 18 11)
+    ($xacells $radiuscells 1)
+    simpleGrading (
+                   ( 
+                    (0.97 0.7 0.022)
+                    (0.03 0.3 1)
+                   )    
+                   1
+                   1
+                  )
+
+    hex (20 21 13 17 22 23 14 18)
+    ($xbcells $radiuscells 1)
+    simpleGrading (1 1 1)
+    
+    hex (21 1 8 13 23 5 10 14)
+    ($outletcells $radiuscells 1)
+    simpleGrading (
+                   ( 
+                    (0.3 0.75 1)
+                    (0.7 0.25 20)
+                   )    
+                   1
+                   1
+                  )
+
+    
+    hex (9 17 16 3 11 18 19 7)
+    ($xacells $piperadiuscells 1)
+    simpleGrading (
+                   ( 
+                    (0.97 0.7 0.022)
+                    (0.03 0.3 1)
+                   )    
+                   1
+                   1
+                  )
+
+    hex (13 8 2 12 14 10 6 15)
+    ($outletcells $piperadiuscells 1)
+    simpleGrading (
+                   ( 
+                    (0.3 0.75 1)
+                    (0.7 0.25 20)
+                   )    
+                   1
+                   1
+                  )
+
+);
+
+edges
+(
+);
+
+boundary
+(
+    inlet
+    {
+        type            patch;
+        faces
+        (
+            (0 4 11 9)
+            (9 11 7 3)
+        );
+    }
+    outlet
+    {
+        type            patch;
+        faces
+        (
+            (2 6 10 8)
+            (8 10 5 1) 
+        );
+    }
+    walls
+    {
+        type wall;
+        faces
+        (
+            (3 7 19 16)
+            (17 18 14 13)
+            (12 15 6 2)
+            (16 19 18 17)
+            (12 13 14 15)
+        );
+    }
+    axis
+    {
+        type symmetryPlane;
+        faces
+        (
+            (1 5 23 21)
+            (21 23 22 20)
+            (20 22 4 0)
+        );
+    } 
+    front
+    {
+        type symmetry;
+        faces
+        (
+            (0 9 17 20)
+            (20 17 13 21)
+            (21 13 8 1)
+            (9 3 16 17)
+            (13 12 2 8)
+        );
+    }
+    back
+    {
+        type symmetry;
+        faces
+        (
+            (4 22 18 11)
+            (22 23 14 18)
+            (23 5 10 14)
+            (11 18 19 7)
+            (14 10 6 15)
+        );
+    }
+);
+
+mergePatchPairs
+(
+);
+
+// ************************************************************************* //

@@ -1,0 +1,400 @@
+/*--------------------------------*- C++ -*----------------------------------*\
+  =========                 |
+  \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
+   \\    /   O peration     | Website:  https://openfoam.org
+    \\  /    A nd           | Version:  6
+     \\/     M anipulation  |
+\*---------------------------------------------------------------------------*/
+FoamFile
+{
+    version     2.0;
+    format      ascii;
+    class       dictionary;
+    object      blockMeshDict;
+}
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+#include "../parameters"
+
+convertToMeters  1;
+
+impellerDiam    #calc "(1-$nonDimGap)*$tankDiam";
+
+diskRadius      #calc "0.5*$diskDiam";
+impellerRadius  #calc "0.5*$impellerDiam";
+tankRadius      #calc "0.5*$tankDiam";
+axisRadius      #calc "0.5*$axisDiam";
+
+inletZ          #calc "-1.0*$inletLength";
+outletZ         #calc "$height+$outletLength";
+rotorZ          #calc "0.0";
+theta   #calc "6.28318530718/$nBlades";
+impellerHalfWid   #calc "0.5*$impellerWid";
+alpha   #calc "0.5*$theta";
+beta    #calc "asin($impellerHalfWid/$diskRadius)";
+gamma   #calc "atan($impellerHalfWid/$impellerRadius)";
+betaAxis    #calc "asin($impellerHalfWid/$axisRadius)";
+angAvg  #calc "0.5*($alpha+$beta)";
+angAvgAxis  #calc "0.5*($alpha+$betaAxis)";
+f       #calc "sqrt(sqr($impellerRadius)+sqr($impellerHalfWid))";
+
+Nouter          #calc "ceil(($tankRadius-$impellerRadius)/$cellSizeRadiusOuter)";
+Ninner          #calc "ceil(($impellerRadius-$diskRadius)/$cellSizeRadius)";
+NthetaOut       #calc "ceil(0.5*($theta-$gamma)*$tankRadius/$cellSizeTheta)";
+NthetaIn        #calc "ceil(2*$gamma*$tankRadius/$cellSizeTheta)";
+NinnerAxis      #calc "ceil(($diskRadius-$axisRadius)/$cellSizeRadius)";
+
+NZinlet      #calc "ceil(($rotorZ-1*$inletZ)/$cellSizeZ)";
+NZimpeller   #calc "ceil(($height-$rotorZ)/$cellSizeZ)";
+NZoutlet     #calc "ceil(($outletZ-$height)/$cellSizeZ)";
+
+p0x     #calc "$f*cos($alpha)";
+p0y     #calc "-$f*sin($alpha)";
+p1x     #calc "$impellerRadius";
+p1y     #calc "-1*$impellerHalfWid";
+p4x     #calc "$tankRadius*cos($gamma)";
+p4y     #calc "-$tankRadius*sin($gamma)";
+p5x     #calc "sqrt(sqr($diskRadius)-sqr($impellerHalfWid))";
+p5y     #calc "-1*$impellerHalfWid";
+p9x     #calc "$tankRadius*cos($alpha)";
+p9y     #calc "-$tankRadius*sin($alpha)";
+p10x    #calc "$diskRadius*cos($alpha)";
+p10y    #calc "-$diskRadius*sin($alpha)";
+
+p2x     #calc "$p1x";
+p2y     #calc "-1*$p1y";
+p3x     #calc "$p0x";
+p3y     #calc "-1*$p0y";
+p6x     #calc "$p4x";
+p6y     #calc "-1*$p4y";
+p7x     #calc "$p5x";
+p7y     #calc "-1*$p5y";
+p8x     #calc "$p9x";
+p8y     #calc "-1*$p9y";
+p11x    #calc "$p10x";
+p11y    #calc "-1*$p10y";
+
+p48x    #calc "$axisRadius*cos($alpha)";
+p48y    #calc "-$axisRadius*sin($alpha)";
+p49x    #calc "sqrt(sqr($axisRadius)-sqr($impellerHalfWid))";
+p49y    #calc "-1*$impellerHalfWid";
+p50x    #calc "$p48x";
+p50y    #calc "-1*$p48y";
+p51x    #calc "$p49x";
+p51y    #calc "-1*$p49y";
+
+a0x     #calc "$f*cos($angAvg)";
+a0y     #calc "-$f*sin($angAvg)";
+a4x     #calc "$tankRadius*cos($angAvg)";
+a4y     #calc "-$tankRadius*sin($angAvg)";
+a6x     #calc "$diskRadius*cos($angAvg)";
+a6y     #calc "-$diskRadius*sin($angAvg)";
+
+a2x     #calc "$a0x";
+a2y     #calc "-1*$a0y";
+a8x     #calc "$a4x";
+a8y     #calc "-1*$a4y";
+a10x    #calc "$a6x";
+a10y    #calc "-1*$a6y";
+
+a48x     #calc "$axisRadius*cos($angAvgAxis)";
+a48y     #calc "-$axisRadius*sin($angAvgAxis)";
+
+a51x     #calc "$a48x";
+a51y     #calc "-1*$a48y";
+
+vertices
+(
+      ($p0x            $p0y        $rotorZ)
+      ($p1x            $p1y        $rotorZ)
+      ($p2x            $p2y        $rotorZ)
+      ($p3x            $p3y        $rotorZ)
+      ($p4x            $p4y        $rotorZ)
+      ($p5x            $p5y        $rotorZ)
+      ($p6x            $p6y        $rotorZ)
+      ($p7x            $p7y        $rotorZ)
+      ($p8x            $p8y        $rotorZ)
+      ($p9x            $p9y        $rotorZ)
+      ($p10x           $p10y       $rotorZ)
+      ($p11x           $p11y       $rotorZ)
+
+      ($p0x            $p0y        $height)
+      ($p1x            $p1y        $height)
+      ($p2x            $p2y        $height)
+      ($p3x            $p3y        $height)
+      ($p4x            $p4y        $height)
+      ($p5x            $p5y        $height)
+      ($p6x            $p6y        $height)
+      ($p7x            $p7y        $height)
+      ($p8x            $p8y        $height)
+      ($p9x            $p9y        $height)
+      ($p10x           $p10y       $height)
+      ($p11x           $p11y       $height)
+
+      ($p0x            $p0y        $inletZ)
+      ($p1x            $p1y        $inletZ)
+      ($p2x            $p2y        $inletZ)
+      ($p3x            $p3y        $inletZ)
+      ($p4x            $p4y        $inletZ)
+      ($p5x            $p5y        $inletZ)
+      ($p6x            $p6y        $inletZ)
+      ($p7x            $p7y        $inletZ)
+      ($p8x            $p8y        $inletZ)
+      ($p9x            $p9y        $inletZ)
+      ($p10x           $p10y       $inletZ)
+      ($p11x           $p11y       $inletZ)
+
+      ($p0x            $p0y        $outletZ)
+      ($p1x            $p1y        $outletZ)
+      ($p2x            $p2y        $outletZ)
+      ($p3x            $p3y        $outletZ)
+      ($p4x            $p4y        $outletZ)
+      ($p5x            $p5y        $outletZ)
+      ($p6x            $p6y        $outletZ)
+      ($p7x            $p7y        $outletZ)
+      ($p8x            $p8y        $outletZ)
+      ($p9x            $p9y        $outletZ)
+      ($p10x           $p10y       $outletZ)
+      ($p11x           $p11y       $outletZ)
+
+      ($p48x           $p48y       $inletZ)
+      ($p49x           $p49y       $inletZ)
+      ($p50x           $p50y       $inletZ)
+      ($p51x           $p51y       $inletZ)
+
+      ($p48x           $p48y       $rotorZ)
+      ($p49x           $p49y       $rotorZ)
+      ($p50x           $p50y       $rotorZ)
+      ($p51x           $p51y       $rotorZ)
+
+      ($p48x           $p48y       $height)
+      ($p49x           $p49y       $height)
+      ($p50x           $p50y       $height)
+      ($p51x           $p51y       $height)
+
+      ($p48x           $p48y       $outletZ)
+      ($p49x           $p49y       $outletZ)
+      ($p50x           $p50y       $outletZ)
+      ($p51x           $p51y       $outletZ)
+);
+
+blocks
+(
+      hex (1 0 9 4 13 12 21 16) ($NthetaOut $Nouter $NZimpeller) simpleGrading (1 1 1)
+      hex (2 1 4 6 14 13 16 18) ($NthetaIn $Nouter $NZimpeller) simpleGrading (1 1 1)
+      hex (3 2 6 8 15 14 18 20) ($NthetaOut $Nouter $NZimpeller) simpleGrading (1 1 1)
+      hex (5 10 0 1 17 22 12 13) ($NthetaOut $Ninner $NZimpeller) simpleGrading (1 1 1)
+      hex (11 7 2 3 23 19 14 15) ($NthetaOut $Ninner $NZimpeller) simpleGrading (1 1 1)
+
+      hex (25 24 33 28 1 0 9 4) ($NthetaOut $Nouter $NZinlet) simpleGrading (1 1 1)
+      hex (26 25 28 30 2 1 4 6) ($NthetaIn $Nouter $NZinlet) simpleGrading (1 1 1)
+      hex (27 26 30 32 3 2 6 8) ($NthetaOut $Nouter $NZinlet) simpleGrading (1 1 1)
+      hex (29 34 24 25 5 10 0 1) ($NthetaOut $Ninner $NZinlet) simpleGrading (1 1 1)
+      hex (35 31 26 27 11 7 2 3) ($NthetaOut $Ninner $NZinlet) simpleGrading (1 1 1)
+
+      hex (13 12 21 16 37 36 45 40) ($NthetaOut $Nouter $NZoutlet) simpleGrading (1 1 1)
+      hex (14 13 16 18 38 37 40 42) ($NthetaIn $Nouter $NZoutlet) simpleGrading (1 1 1)
+      hex (15 14 18 20 39 38 42 44) ($NthetaOut $Nouter $NZoutlet) simpleGrading (1 1 1)
+      hex (17 22 12 13 41 46 36 37) ($NthetaOut $Ninner $NZoutlet) simpleGrading (1 1 1)
+      hex (23 19 14 15 47 43 38 39) ($NthetaOut $Ninner $NZoutlet) simpleGrading (1 1 1)
+
+      hex (25 26 31 29 1 2 7 5) ($NthetaIn $Ninner $NZinlet) simpleGrading (1 1 1)
+      hex (13 14 19 17 37 38 43 41) ($NthetaIn $Ninner $NZoutlet) simpleGrading (1 1 1)
+
+      hex (49 48 34 29 53 52 10 5) ($NthetaOut $NinnerAxis $NZinlet) simpleGrading (1 1 1)
+      hex (51 49 29 31 55 53 5 7) ($NthetaIn $NinnerAxis $NZinlet) simpleGrading (1 1 1)
+      hex (50 51 31 35 54 55 7 11) ($NthetaOut $NinnerAxis $NZinlet) simpleGrading (1 1 1)
+
+      hex (57 56 22 17 61 60 46 41) ($NthetaOut $NinnerAxis $NZoutlet) simpleGrading (1 1 1)
+      hex (59 57 17 19 63 61 41 43) ($NthetaIn $NinnerAxis $NZoutlet) simpleGrading (1 1 1)
+      hex (58 59 19 23 62 63 43 47) ($NthetaOut $NinnerAxis $NZoutlet) simpleGrading (1 1 1)
+);
+
+edges
+(
+      arc  0 1 (       $a0x        $a0y        $rotorZ )
+      arc  2 3 (       $a2x        $a2y        $rotorZ )
+      arc  9 4 (       $a4x        $a4y        $rotorZ )
+      arc  5 10 (      $a6x        $a6y        $rotorZ )
+      arc  6 8 (       $a8x        $a8y        $rotorZ )
+      arc  11 7 (      $a10x       $a10y       $rotorZ )
+      arc  4 6 (       $tankRadius   0.000     $rotorZ )
+
+      arc  12 13 (     $a0x        $a0y        $height )
+      arc  14 15 (     $a2x        $a2y        $height )
+      arc  21 16 (     $a4x        $a4y        $height )
+      arc  17 22 (     $a6x        $a6y        $height )
+      arc  18 20 (     $a8x        $a8y        $height )
+      arc  23 19 (     $a10x       $a10y       $height )
+      arc  16 18 (     $tankRadius   0.000     $height )
+
+      arc  24 25 (       $a0x        $a0y       $inletZ )
+      arc  26 27 (       $a2x        $a2y       $inletZ )
+      arc  33 28 (       $a4x        $a4y       $inletZ )
+      arc  29 34 (      $a6x        $a6y        $inletZ )
+      arc  30 32 (       $a8x        $a8y       $inletZ )
+      arc  35 31 (      $a10x       $a10y       $inletZ )
+      arc  28 30 (       $tankRadius   0.000    $inletZ )
+
+      arc  36 37 (       $a0x        $a0y       $outletZ )
+      arc  38 39 (       $a2x        $a2y       $outletZ )
+      arc  45 40 (       $a4x        $a4y       $outletZ )
+      arc  41 46 (      $a6x        $a6y        $outletZ )
+      arc  42 44 (       $a8x        $a8y       $outletZ )
+      arc  47 43 (      $a10x       $a10y       $outletZ )
+      arc  40 42 (       $tankRadius   0.000    $outletZ )
+
+      arc  49 51 (       $axisRadius   0.000    $inletZ )
+      arc  48 49 (       $a48x        $a48y     $inletZ )
+      arc  51 50 (       $a51x        $a51y     $inletZ )
+
+      arc  61 63 (       $axisRadius   0.000    $outletZ )
+      arc  60 61 (       $a48x        $a48y     $outletZ )
+      arc  63 62 (       $a51x        $a51y     $outletZ )
+
+      arc  53 55 (       $axisRadius   0.000    $rotorZ )
+      arc  52 53 (       $a48x        $a48y     $rotorZ )
+      arc  55 54 (       $a51x        $a51y     $rotorZ )
+
+      arc  57 59 (       $axisRadius   0.000    $height )
+      arc  56 57 (       $a48x        $a48y     $height )
+      arc  59 58 (       $a51x        $a51y     $height )
+);
+
+boundary
+(
+    topWall
+    {
+        type patch;
+        faces
+        (
+            (37 36 45 40)
+            (38 37 40 42)
+            (39 38 42 44)
+            (41 46 36 37)
+            (47 43 38 39)
+            (61 60 46 41)
+            (63 61 41 43)
+            (62 63 43 47)
+            (37 38 43 41)
+        );
+    }
+    bottomWall
+    {
+        type patch;
+        faces
+        (
+            (25 28 33 24)
+            (26 30 28 25)
+            (27 32 30 26)
+            (29 25 24 34)
+            (35 27 26 31)
+            (49 48 34 29)
+            (51 49 29 31)
+            (50 51 31 35)
+            (25 26 31 29)
+        );
+    }
+    innerWall
+    {
+        type wall;
+        faces
+        (
+            (2 1 13 14)
+            (5 10 22 17)
+            (5 17 13 1)
+            (11 7 19 23)
+            (7 2 14 19)
+
+            (1 2 7 5)
+            (13 14 19 17)
+
+            (53 52 10 5)
+            (55 53 5 7)
+            (54 55 7 11)
+
+            (57 56 22 17)
+            (59 57 17 19)
+            (58 59 19 23)
+
+            (51 49 53 55)
+            (49 48 52 53)
+            (50 51 55 54)
+
+            (59 57 61 63)
+            (57 56 60 61)
+            (58 59 63 62)
+        );
+    }
+    outerWall
+    {
+        type wall;
+        faces
+        (
+            (4 16 21 9)
+            (6 18 16 4)
+            (8 20 18 6)
+
+            (16 40 45 21)
+            (18 42 40 16)
+            (20 44 42 18)
+
+            (28 4 9 33)
+            (30 6 4 28)
+            (32 8 6 30)
+        );
+    }
+    cyclic_half0
+    {
+        type cyclic;
+        neighbourPatch cyclic_half1;
+        transform rotational;
+        rotationAxis (0 0 1);
+        rotationCentre (0 0 0);
+        matchTolerance  0.001;
+        faces
+        (
+            (0 9 21 12)
+            (10 0 12 22)
+
+            (12 21 45 36)
+            (22 12 36 46)
+
+            (24 33 9 0)
+            (34 24 0 10)
+
+            (48 34 10 52)
+            (56 22 46 60)
+        );
+    }
+    cyclic_half1
+    {
+        type cyclic;
+        neighbourPatch cyclic_half0;
+        transform rotational;
+        rotationAxis (0 0 1);
+        rotationCentre (0 0 0);
+        matchTolerance  0.001;
+        faces
+        (
+            (3 15 20 8)
+            (11 23 15 3)
+
+            (15 39 44 20)
+            (23 47 39 15)
+
+            (27 3 8 32)
+            (35 11 3 27)
+
+            (35 50 54 11)
+            (23 58 62 47)
+        );
+    }
+);
+
+mergeMatchPairs
+(
+);
+
+// ************************************************************************* //

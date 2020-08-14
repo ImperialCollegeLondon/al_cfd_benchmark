@@ -1,0 +1,32 @@
+/*--------------------------------*- C++ -*----------------------------------*\
+  =========                 |
+  \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
+   \\    /   O peration     | Website:  https://openfoam.org
+    \\  /    A nd           | Version:  6
+     \\/     M anipulation  |
+\*---------------------------------------------------------------------------*/
+FoamFile
+{
+    version     2.0;
+    format      ascii;
+    class       dictionary;
+    object      parameters;
+}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+// Geometry
+Diameter            0.06;
+inletToD            10;
+outletToD           10;
+sigma               0.54;           
+sTod                0.20;             
+
+// Mesh
+size                           0.0003;
+MeshFactor                     0.5;
+
+// Fluid Property
+Re                             100000;
+
+
+

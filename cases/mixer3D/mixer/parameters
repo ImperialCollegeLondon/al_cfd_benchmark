@@ -1,0 +1,35 @@
+/*--------------------------------*- C++ -*----------------------------------*\
+  =========                 |
+  \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
+   \\    /   O peration     | Website:  https://openfoam.org
+    \\  /    A nd           | Version:  6
+     \\/     M anipulation  |
+\*---------------------------------------------------------------------------*/
+FoamFile
+{
+    version     2.0;
+    format      ascii;
+    class       dictionary;
+    object      parameters;
+}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+nonDimGap            0.06;
+reynolds             10.0;
+reynoldsAx           0.05;
+n                    1.0;
+nBlades              4;
+
+tankDiam             1;             // 0.035;
+impellerWid          0.05714285714; // 0.002;
+diskDiam             0.22857142857; // 0.008;
+axisDiam             0.1;
+
+height               0.5;
+inletLength          1.0;
+outletLength         1.0;
+
+cellSizeRadius       0.01;
+cellSizeRadiusOuter  0.005;
+cellSizeTheta        0.01;
+cellSizeZ            0.01;

@@ -1,0 +1,219 @@
+/*--------------------------------*- C++ -*----------------------------------*\
+  =========                 |
+  \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
+   \\    /   O peration     | Website:  https://openfoam.org
+    \\  /    A nd           | Version:  6
+     \\/     M anipulation  |
+\*---------------------------------------------------------------------------*/
+FoamFile
+{
+    version     2.0;
+    format      ascii;
+    class       dictionary;
+    object      blockMeshDict;
+}
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+#include "../parameters"
+
+convertToMeters  1;
+
+impellerDiam    #calc "(1-$nonDimGap)*$tankDiam";
+
+diskRadius      #calc "0.5*$diskDiam";
+impellerRadius  #calc "0.5*$impellerDiam";
+tankRadius      #calc "0.5*$tankDiam";
+
+negHeight       #calc "-1.0*$height";
+theta   #calc "6.28318530718/$nBlades";
+impellerHalfWid   #calc "0.5*$impellerWid";
+alpha   #calc "0.5*$theta";
+beta    #calc "asin($impellerHalfWid/$diskRadius)";
+gamma   #calc "atan($impellerHalfWid/$impellerRadius)";
+angAvg  #calc "0.5*($alpha+$beta)";
+f       #calc "sqrt(sqr($impellerRadius)+sqr($impellerHalfWid))";
+
+Nouter          #calc "ceil(($tankRadius-$impellerRadius)/$cellSizeRadiusOuter)";
+Ninner          #calc "ceil(($impellerRadius-$diskRadius)/$cellSizeRadius)";
+NthetaOut       #calc "ceil(0.5*($theta-$gamma)*$tankRadius/$cellSizeTheta)";
+NthetaIn        #calc "ceil(2*$gamma*$tankRadius/$cellSizeTheta)";
+
+p0x     #calc "$f*cos($alpha)";
+p0y     #calc "-$f*sin($alpha)";
+p1x     #calc "$impellerRadius";
+p1y     #calc "-$impellerHalfWid";
+p4x     #calc "$tankRadius*cos($gamma)";
+p4y     #calc "-$tankRadius*sin($gamma)";
+p5x     #calc "sqrt(sqr($diskRadius)-sqr($impellerHalfWid))";
+p5y     #calc "-$impellerHalfWid";
+p9x     #calc "$tankRadius*cos($alpha)";
+p9y     #calc "-$tankRadius*sin($alpha)";
+p10x    #calc "$diskRadius*cos($alpha)";
+p10y    #calc "-$diskRadius*sin($alpha)";
+
+p2x     #calc "$p1x";
+p2y     #calc "-1*$p1y";
+p3x     #calc "$p0x";
+p3y     #calc "-1*$p0y";
+p6x     #calc "$p4x";
+p6y     #calc "-1*$p4y";
+p7x     #calc "$p5x";
+p7y     #calc "-1*$p5y";
+p8x     #calc "$p9x";
+p8y     #calc "-1*$p9y";
+p11x    #calc "$p10x";
+p11y    #calc "-1*$p10y";
+
+a0x     #calc "$f*cos($angAvg)";
+a0y     #calc "-$f*sin($angAvg)";
+a4x     #calc "$tankRadius*cos($angAvg)";
+a4y     #calc "-$tankRadius*sin($angAvg)";
+a6x     #calc "$diskRadius*cos($angAvg)";
+a6y     #calc "-$diskRadius*sin($angAvg)";
+
+a2x     #calc "$a0x";
+a2y     #calc "-1*$a0y";
+a8x     #calc "$a4x";
+a8y     #calc "-1*$a4y";
+a10x    #calc "$a6x";
+a10y    #calc "-1*$a6y";
+
+vertices
+(
+      ($p0x            $p0y        $negHeight)
+      ($p1x            $p1y        $negHeight)
+      ($p2x            $p2y        $negHeight)
+      ($p3x            $p3y        $negHeight)
+      ($p4x            $p4y        $negHeight)
+      ($p5x            $p5y        $negHeight)
+      ($p6x            $p6y        $negHeight)
+      ($p7x            $p7y        $negHeight)
+      ($p8x            $p8y        $negHeight)
+      ($p9x            $p9y        $negHeight)
+      ($p10x           $p10y       $negHeight)
+      ($p11x           $p11y       $negHeight)
+      ($p0x            $p0y        $height)
+      ($p1x            $p1y        $height)
+      ($p2x            $p2y        $height)
+      ($p3x            $p3y        $height)
+      ($p4x            $p4y        $height)
+      ($p5x            $p5y        $height)
+      ($p6x            $p6y        $height)
+      ($p7x            $p7y        $height)
+      ($p8x            $p8y        $height)
+      ($p9x            $p9y        $height)
+      ($p10x           $p10y       $height)
+      ($p11x           $p11y       $height)
+);
+
+blocks
+(
+      hex (1 0 9 4 13 12 21 16) ($NthetaOut $Nouter 1) simpleGrading (1 1 1)
+      hex (2 1 4 6 14 13 16 18) ($NthetaIn $Nouter 1) simpleGrading (1 1 1)
+      hex (3 2 6 8 15 14 18 20) ($NthetaOut $Nouter 1) simpleGrading (1 1 1)
+      hex (5 10 0 1 17 22 12 13) ($NthetaOut $Ninner 1) simpleGrading (1 1 1)
+      hex (11 7 2 3 23 19 14 15) ($NthetaOut $Ninner 1) simpleGrading (1 1 1)
+);
+
+edges
+(
+      arc  0 1 (       $a0x        $a0y        $negHeight )
+      arc  12 13 (     $a0x        $a0y        $height )
+      arc  2 3 (       $a2x        $a2y        $negHeight )
+      arc  14 15 (     $a2x        $a2y        $height )
+      arc  9 4 (       $a4x        $a4y        $negHeight )
+      arc  21 16 (     $a4x        $a4y        $height )
+      arc  5 10 (      $a6x        $a6y        $negHeight )
+      arc  17 22 (     $a6x        $a6y        $height )
+      arc  6 8 (       $a8x        $a8y        $negHeight )
+      arc  18 20 (     $a8x        $a8y        $height )
+      arc  11 7 (      $a10x       $a10y       $negHeight )
+      arc  23 19 (     $a10x       $a10y       $height )
+      arc  4 6 (       $tankRadius   0.000     $negHeight )
+      arc  16 18 (     $tankRadius   0.000     $height )
+);
+
+boundary
+(
+    topWall
+    {
+        type empty;
+        faces
+        (
+            (13 12 21 16)
+            (14 13 16 18)
+            (15 14 18 20)
+            (17 22 12 13)
+            (23 19 14 15)
+        );
+    }
+    bottomWall
+    {
+        type empty;
+        faces
+        (
+            (1 4 9 0)
+            (2 6 4 1)
+            (3 8 6 2)
+            (5 1 0 10)
+            (11 3 2 7)
+        );
+    }
+    innerWall
+    {
+        type wall;
+        faces
+        (
+            (2 1 13 14)
+            (5 10 22 17)
+            (5 17 13 1)
+            (11 7 19 23)
+            (7 2 14 19)
+        );
+    }
+    outerWall
+    {
+        type wall;
+        faces
+        (
+            (4 16 21 9)
+            (6 18 16 4)
+            (8 20 18 6)
+        );
+    }
+    cyclic_half0
+    {
+        type cyclic;
+        neighbourPatch cyclic_half1;
+        transform rotational;
+        rotationAxis (0 0 1);
+        rotationCentre (0 0 0);
+        matchTolerance  0.001;
+        faces
+        (
+            (0 9 21 12)
+            (10 0 12 22)
+        );
+    }
+    cyclic_half1
+    {
+        type cyclic;
+        neighbourPatch cyclic_half0;
+        transform rotational;
+        rotationAxis (0 0 1);
+        rotationCentre (0 0 0);
+        matchTolerance  0.001;
+        faces
+        (
+            (3 15 20 8)
+            (11 23 15 3)
+        );
+    }
+);
+
+mergeMatchPairs
+(
+);
+
+// ************************************************************************* //

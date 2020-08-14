@@ -1,0 +1,89 @@
+/*--------------------------------*- C++ -*----------------------------------*\
+  =========                 |
+  \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
+   \\    /   O peration     | Website:  https://openfoam.org
+    \\  /    A nd           | Version:  6
+     \\/     M anipulation  |
+\*---------------------------------------------------------------------------*/
+FoamFile
+{
+    version     2.0;
+    format      ascii;
+    class       dictionary;
+    location    "system";
+    object      controlDict;
+}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+application     simpleFoam;
+
+startFrom       startTime;
+
+startTime       0;
+
+stopAt          endTime;
+
+endTime         100000;
+
+deltaT          1;
+
+writeControl    timeStep;
+
+writeInterval   1000;
+
+purgeWrite      0;
+
+writeFormat     binary;
+
+writePrecision  6;
+
+writeCompression off;
+
+timeFormat      general;
+
+timePrecision   6;
+
+runTimeModifiable true;
+
+functions
+{
+    Tracer
+    {
+        type    scalarTransport;
+        functionObjectLibs ("libsolverFunctionObjects.so");
+	field "Tracer";
+        writeControl writeTime;
+        active          true;
+        autoSchemes     false;
+        nCorr           0;
+        resetOnStartUp false;
+        fvOptions       
+        {
+         
+        }
+    }
+           covTracerOutlet
+    {
+        libs        ("libutilityFunctionObjects.so");
+        type coded;
+        name covTracer;
+        codeExecute
+        #{
+            // Lookup c
+            const volScalarField& c = mesh().lookupObject<volScalarField>("Tracer");
+            // Get c at outlet
+            label patchi = mesh().boundaryMesh().findPatchID("outlet");
+            const scalarField& cBf = c.boundaryField()[patchi];
+            const scalarField& magSf = mesh().boundary()[patchi].magSf();
+            // Calculate average of c
+            scalar cAvg = gSum(magSf*cBf)/gSum(magSf);
+            // Calculate (c - cAvg)^2
+            scalarField cPrimeSqr = sqr(cBf - cAvg);
+            // Calculate coefficient of variation
+            scalar cStDev = sqrt(gSum(magSf*cPrimeSqr)/gSum(magSf));
+            Info << "Mixing CoV at outlet: " << cStDev/max(cAvg, VSMALL) << endl;
+        #};
+    }
+}
+
+// ************************************************************************* //
